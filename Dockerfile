@@ -94,5 +94,4 @@ RUN cp build/bin/boolector /usr/local/bin \
     && cp build/bin/btor* /usr/local/bin \
     && cp deps/btor2tools/bin/btorsim /usr/local/bin
 
-ENTRYPOINT ["/usr/local/bin/sby"]
-CMD ["--help"]
+ENTRYPOINT ["/bin/bash"]
