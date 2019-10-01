@@ -1,8 +1,8 @@
 FROM ubuntu:18.04 AS yosys-builder
 LABEL maintainer="andrsmllr <andrsmllr@bananatronics.org>"
-LABEL description="Yosys open source synthesis engine"
+LABEL description="SymbiYosys open source formal verification toolkit"
 LABEL version="1.0"
-ARG YOSYS_VERSION=
+#ARG YOSYS_VERSION=
 
 ENV TERM xterm-256color
 VOLUME /workdir
@@ -36,25 +36,25 @@ RUN apt update -qq \
       cmake \
       wget
 
-ENV YOSYS_SRC /tmp/yosys
+ENV YOSYS_SRC /usr/src/yosys
 RUN git clone https://github.com/YosysHQ/yosys.git ${YOSYS_SRC}
 WORKDIR ${YOSYS_SRC}
 RUN make -j$(nproc)
 RUN make install
 
-ENV SBY_SRC /tmp/symbiyosys
+ENV SBY_SRC /usr/src/symbiyosys
 RUN git clone https://github.com/YosysHQ/SymbiYosys.git ${SBY_SRC}
 WORKDIR ${SBY_SRC}
 RUN make install
 
-ENV YICES2_SRC /tmp/yices2
+ENV YICES2_SRC /usr/src/yices2
 RUN git clone https://github.com/SRI-CSL/yices2.git ${YICES2_SRC}
 WORKDIR ${YICES2_SRC}
 RUN autoconf && ./configure
 RUN make -j$(nproc)
 RUN make install
 
-ENV Z3_SRC /tmp/z3
+ENV Z3_SRC /usr/src/z3
 RUN git clone https://github.com/Z3Prover/z3.git ${Z3_SRC}
 WORKDIR ${Z3_SRC}
 RUN python ./scripts/mk_make.py
@@ -72,7 +72,7 @@ RUN echo '#!/bin/bash' >> ${SPRPRV_WRAPPER}; \
     echo 'tool=super_prove; if [ "$1" != "${1$#+}" ]; then tool="${1#+}"; shift; fi' >> ${SPRPRV_WRAPPER} \
     echo 'exec /usr/local/super_prove/bin/${tool}.sh "$@"' >> ${SPRPRV_WRAPPER}
 
-ENV AVY_SRC /tmp/avy
+ENV AVY_SRC /usr/src/avy
 RUN git clone https://bitbucket.org/arieg/extavy.git ${AVY_SRC}
 WORKDIR ${AVY_SRC}
 RUN git submodule update --init --recursive \
@@ -83,7 +83,7 @@ RUN make -j$(nproc)
 RUN cp ./avy/src/avy /usr/local/bin \
     && cp ./avy/src/avybmc /usr/local/bin
 
-ENV BOOLECTOR_SRC /tmp/boolector
+ENV BOOLECTOR_SRC /usr/src/boolector
 RUN git clone https://github.com/boolector/boolector ${BOOLECTOR_SRC}
 WORKDIR ${BOOLECTOR_SRC}
 RUN ./contrib/setup-btor2tools.sh \
@@ -94,5 +94,5 @@ RUN cp build/bin/boolector /usr/local/bin \
     && cp build/bin/btor* /usr/local/bin \
     && cp deps/btor2tools/bin/btorsim /usr/local/bin
 
-ENTRYPOINT ["/usr/local/bin/yosys"]
+ENTRYPOINT ["/usr/local/bin/sby"]
 CMD ["--help"]
