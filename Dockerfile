@@ -34,7 +34,12 @@ RUN apt update -qq \
       autoconf \
       libgmp-dev \
       cmake \
-      wget
+      wget \
+      curl \
+      libpython2.7
+
+# fix lib for superprove
+RUN ln -s /lib/x86_64-linux-gnu/libreadline.so.7 /lib/x86_64-linux-gnu/libreadline.so.6
 
 ENV YOSYS_SRC /usr/src/yosys
 RUN git clone https://github.com/YosysHQ/yosys.git ${YOSYS_SRC}
@@ -62,15 +67,16 @@ WORKDIR ${Z3_SRC}/build
 RUN make -j$(nproc)
 RUN make install
 
-ENV SPRPRV_SRC /usr/local/superprove
+ENV SPRPRV_SRC /usr/local/super_prove
 RUN mkdir ${SPRPRV_SRC}
 WORKDIR ${SPRPRV_SRC}
 RUN wget http://downloads.bvsrc.org/super_prove/super_prove-hwmcc17_final-2-d7b71160dddb-Ubuntu_14.04-Release.tar.gz
-RUN tar xf $(find . -name "super_prove*.tar.gz")
+RUN tar xf $(find . -name "super_prove*.tar.gz") --strip-components 1
 ENV SPRPRV_WRAPPER /usr/local/bin/superprove
 RUN echo '#!/bin/bash' >> ${SPRPRV_WRAPPER}; \
-    echo 'tool=super_prove; if [ "$1" != "${1$#+}" ]; then tool="${1#+}"; shift; fi' >> ${SPRPRV_WRAPPER} \
-    echo 'exec /usr/local/super_prove/bin/${tool}.sh "$@"' >> ${SPRPRV_WRAPPER}
+    echo 'tool=super_prove; if [ "$1" != "${1$#+}" ]; then tool="${1#+}"; shift; fi' >> ${SPRPRV_WRAPPER}; \
+    echo 'exec /usr/local/super_prove/bin/${tool}.sh "$@"' >> ${SPRPRV_WRAPPER}; \
+    chmod +x ${SPRPRV_WRAPPER}
 
 ENV AVY_SRC /usr/src/avy
 RUN git clone https://bitbucket.org/arieg/extavy.git ${AVY_SRC}
