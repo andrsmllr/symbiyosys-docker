@@ -34,7 +34,8 @@ RUN apt update -qq \
       autoconf \
       libgmp-dev \
       cmake \
-      wget
+      wget \
+      curl
 
 ENV YOSYS_SRC /usr/src/yosys
 RUN git clone https://github.com/YosysHQ/yosys.git ${YOSYS_SRC}
